@@ -94,7 +94,7 @@ class Game {
   snakeMoved(position, snake) {
     // If the snake lands on a dot, increase the score and generate a new dot
     if (position.x === this.dot.x && position.y === this.dot.y) {
-      snake.scored();
+      snake.scored()
       this.ui.updateScore(snake.score)
       this.generateDot()
     }
@@ -147,8 +147,8 @@ class Game {
   }
 
   checkPlayerHits() {
-    const width = this.ui.gameContainer.width;
-    const height = this.ui.gameContainer.height;
+    const width = this.ui.gameContainer.width
+    const height = this.ui.gameContainer.height
 
     for (let [index, snake] of this.snakes.entries()) {
       if (snake.hit(width, height)) {

@@ -22,7 +22,7 @@ class Snake {
 
   hit(maxX, maxY) {
     // If the snake collides with itself, end the game
-    const selfCollision = this.selfCollision();
+    const selfCollision = this.selfCollision()
 
     return (
       selfCollision ||
@@ -50,7 +50,7 @@ class Snake {
     if ((dir === 'right' || dir === 'd') && this.currentDirection !== 'left') {
       this.currentDirection = 'right'
     }
-    this.move();
+    this.move()
   }
 
   selfCollision() {
@@ -63,18 +63,18 @@ class Snake {
 
   // woohoo!
   scored() {
-    this.score++;
+    this.score++
   }
 
   isAt(position) {
     this.segments.forEach(segment => {
-      if (segment.x === position.x && segment.y === position.y) return true;
-    });
-    return false;
+      if (segment.x === position.x && segment.y === position.y) return true
+    })
+    return false
   }
 
   bye() {
-    // this.client.write('you ded\n', () => this.client.end());
+    // this.client.write('you ded\n', () => this.client.end())
     this.client.end()
   }
 
@@ -87,7 +87,7 @@ class Snake {
 
     this.segments.unshift(head)
     
-    this.snakeMoved(this.segments[0], this);
+    this.snakeMoved(this.segments[0], this)
     
     // uncomment if we want the snake to grow
     // else {
