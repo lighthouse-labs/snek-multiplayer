@@ -26,7 +26,7 @@ class Game {
     // User interface class for all i/o operations
     this.ui = ui
     this.server = server
-    this.snake = new Snake(INITIAL_SNAKE_SIZE, this.snakeMoved.bind(this));
+    this.snake = new Snake(INITIAL_SNAKE_SIZE, SNAKE_COLOR, this.snakeMoved.bind(this));
 
     this.reset()
 
@@ -101,7 +101,7 @@ class Game {
   drawSnake() {
     // Render each snake segment as a pixel
     this.snake.segments.forEach(segment => {
-      this.ui.draw(segment, SNAKE_COLOR)
+      this.ui.draw(segment, this.snake.color)
     })
   }
 

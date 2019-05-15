@@ -1,4 +1,4 @@
-const GAME_SPEED = 50
+const GAME_SPEED = 20
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
   down: { x: 0, y: 1 },
@@ -6,7 +6,7 @@ const DIRECTIONS = {
   left: { x: -1, y: 0 },
 }
 const INITIAL_SNAKE_SIZE = 3
-const SNAKE_COLOR = 'green'
+const SNAKE_COLOR = '#0F0FFF'
 const DOT_COLOR = 'red'
 
 module.exports = {

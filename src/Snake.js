@@ -3,12 +3,12 @@ const {
 } = require('./constants')
 
 class Snake {
-  constructor(initialSize, onMove) {
+  constructor(initialSize, color, onMove) {
     // this.client
-    this.initialSize = initialSize;
+    this.initialSize = initialSize
     this.currentDirection = 'right'
     this.score = 0
-    this.colour = 'FF0000'
+    this.color = color
     this.snakeMoved = onMove
     this.reset()
   }
