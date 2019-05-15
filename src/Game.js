@@ -20,9 +20,10 @@ const {
  * screen, and drawing elements to the screen.
  */
 class Game {
-  constructor(ui) {
+  constructor(ui, server) {
     // User interface class for all i/o operations
     this.ui = ui
+    this.server = server
 
     this.reset()
 
@@ -31,6 +32,10 @@ class Game {
       this.changeDirection.bind(this),
       this.quit.bind(this),
       this.start.bind(this)
+    )
+
+    this.server.bindHandlers(
+      this.changeDirection.bind(this)
     )
   }
 
@@ -58,6 +63,7 @@ class Game {
    * do not allow reversal.
    */
   changeDirection(_, key) {
+    console.log('key: ', key);
     if ((key.name === 'up' || key.name === 'w') && this.currentDirection !== 'down') {
       this.currentDirection = 'up'
     }
@@ -70,6 +76,7 @@ class Game {
     if ((key.name === 'right' || key.name === 'd') && this.currentDirection !== 'left') {
       this.currentDirection = 'right'
     }
+    this.moveSnake();
   }
 
   /**
@@ -94,10 +101,12 @@ class Game {
       this.score++
       this.ui.updateScore(this.score)
       this.generateDot()
-    } else {
+    }
+    // uncomment if we want the snake to grow
+    // else {
       // Otherwise, slither
       this.snake.pop()
-    }
+    //}
   }
 
   generateRandomPixelCoord(min, max) {
@@ -167,7 +176,6 @@ class Game {
 
     this.ui.clearScreen()
     this.drawDot()
-    this.moveSnake()
     this.drawSnake()
     this.ui.render()
   }
