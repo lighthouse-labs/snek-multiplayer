@@ -6,6 +6,8 @@ const {
   DOT_COLOR,
 } = require('./constants')
 
+const { Snake } = require('./Snake')
+
 /**
  * @class Game
  *
@@ -24,6 +26,7 @@ class Game {
     // User interface class for all i/o operations
     this.ui = ui
     this.server = server
+    this.snake = new Snake(INITIAL_SNAKE_SIZE, this.snakeMoved.bind(this));
 
     this.reset()
 
@@ -41,15 +44,9 @@ class Game {
 
   reset() {
     // Set up initial state
-    this.snake = []
-
-    for (let i = INITIAL_SNAKE_SIZE; i >= 0; i--) {
-      this.snake[INITIAL_SNAKE_SIZE - i] = { x: i, y: 0 }
-    }
-
+    this.snake.reset();
     this.dot = {}
     this.score = 0
-    this.currentDirection = 'right'
     this.timer = null
 
     // Generate the first dot before the game begins
@@ -63,20 +60,8 @@ class Game {
    * do not allow reversal.
    */
   changeDirection(_, key) {
-    console.log('key: ', key);
-    if ((key.name === 'up' || key.name === 'w') && this.currentDirection !== 'down') {
-      this.currentDirection = 'up'
-    }
-    if ((key.name === 'down' || key.name === 's') && this.currentDirection !== 'up') {
-      this.currentDirection = 'down'
-    }
-    if ((key.name === 'left' || key.name === 'a') && this.currentDirection !== 'right') {
-      this.currentDirection = 'left'
-    }
-    if ((key.name === 'right' || key.name === 'd') && this.currentDirection !== 'left') {
-      this.currentDirection = 'right'
-    }
-    this.moveSnake();
+    // console.log('key: ', key);
+    this.snake.changeDirection(key.name)
   }
 
   /**
@@ -87,26 +72,14 @@ class Game {
    * the score and increase the length of the snake by one.
    *
    */
-  moveSnake() {
-    // Move the head forward by one pixel based on velocity
-    const head = {
-      x: this.snake[0].x + DIRECTIONS[this.currentDirection].x,
-      y: this.snake[0].y + DIRECTIONS[this.currentDirection].y,
-    }
-
-    this.snake.unshift(head)
-
+  snakeMoved(position, snake) {
     // If the snake lands on a dot, increase the score and generate a new dot
-    if (this.snake[0].x === this.dot.x && this.snake[0].y === this.dot.y) {
-      this.score++
+    // console.log('position: ', position);
+    if (position.x === this.dot.x && position.y === this.dot.y) {
+      this.snake.scored();
       this.ui.updateScore(this.score)
       this.generateDot()
     }
-    // uncomment if we want the snake to grow
-    // else {
-      // Otherwise, slither
-      this.snake.pop()
-    //}
   }
 
   generateRandomPixelCoord(min, max) {
@@ -120,16 +93,14 @@ class Game {
     this.dot.y = this.generateRandomPixelCoord(1, this.ui.gameContainer.height - 1)
 
     // If the pixel is on a snake, regenerate the dot
-    this.snake.forEach(segment => {
-      if (segment.x === this.dot.x && segment.y === this.dot.y) {
-        this.generateDot()
-      }
-    })
+    if (this.snake.isAt(this.dot)) {
+      this.generateDot()
+    }
   }
 
   drawSnake() {
     // Render each snake segment as a pixel
-    this.snake.forEach(segment => {
+    this.snake.segments.forEach(segment => {
       this.ui.draw(segment, SNAKE_COLOR)
     })
   }
@@ -141,22 +112,18 @@ class Game {
 
   isGameOver() {
     // If the snake collides with itself, end the game
-    const collide = this.snake
-      // Filter out the head
-      .filter((_, i) => i > 0)
-      // If head collides with any segment, collision
-      .some(segment => segment.x === this.snake[0].x && segment.y === this.snake[0].y)
+    const collide = this.snake.collision();
 
     return (
       collide ||
       // Right wall
-      this.snake[0].x >= this.ui.gameContainer.width - 1 ||
+      this.snake.segments[0].x >= this.ui.gameContainer.width - 1 ||
       // Left wall
-      this.snake[0].x <= -1 ||
+      this.snake.segments[0].x <= -1 ||
       // Top wall
-      this.snake[0].y >= this.ui.gameContainer.height - 1 ||
+      this.snake.segments[0].y >= this.ui.gameContainer.height - 1 ||
       // Bottom wall
-      this.snake[0].y <= -1
+      this.snake.segments[0].y <= -1
     )
   }
 
