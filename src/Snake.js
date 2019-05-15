@@ -3,8 +3,8 @@ const {
 } = require('./constants')
 
 class Snake {
-  constructor(initialSize, color, onMove) {
-    // this.client
+  constructor(client, initialSize, color, onMove) {
+    this.client = client
     this.initialSize = initialSize
     this.currentDirection = 'right'
     this.score = 0
@@ -18,6 +18,23 @@ class Snake {
     for (let i = this.initialSize; i >= 0; i--) {
       this.segments[this.initialSize - i] = { x: i, y: 0 }
     }
+  }
+
+  hit(maxX, maxY) {
+    // If the snake collides with itself, end the game
+    const selfCollision = this.selfCollision();
+
+    return (
+      selfCollision ||
+      // Right wall
+      this.segments[0].x >= maxX ||
+      // Left wall
+      this.segments[0].x <= -1 ||
+      // Top wall
+      this.segments[0].y >= maxY ||
+      // Bottom wall
+      this.segments[0].y <= -1
+    )
   }
 
   changeDirection(dir) {
@@ -36,7 +53,7 @@ class Snake {
     this.move();
   }
 
-  collision() {
+  selfCollision() {
     return this.segments
       // Filter out the head
       .filter((_, i) => i > 0)
@@ -54,6 +71,11 @@ class Snake {
       if (segment.x === position.x && segment.y === position.y) return true;
     });
     return false;
+  }
+
+  bye() {
+    // this.client.write('you ded\n', () => this.client.end());
+    this.client.end()
   }
 
   move() {

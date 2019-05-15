@@ -27,22 +27,29 @@ class RemoteInterface {
   }
 
   handleNewClient(client) {
-    process.stdout.write('\x07')
+    // process.stdout.write('\x07')
     this.clients.push(client)
+    
     client.setEncoding('utf8')
-    client.write("helllooo, what's your name???\n")
+    
+    if (this.newClientHandler) 
+      this.newClientHandler(client)
+    
     client.on('data', (data) => {
-      // process.stdout.write('\x07');
-      // process.stdout.write(data)
-      // console.log('data:', data);
       const key = { name: data }
-      if (this.movementHandler) this.movementHandler("", key, client)
+      if (this.clientDataHandler) this.clientDataHandler(key, client)
+    })
+
+    client.on('end', () => {
+      if (this.clientEndHandler) this.clientEndHandler(client)
     })
   }
 
-  bindHandlers(movementHandler) {
+  bindHandlers(clientDataHandler, newClientHandler, clientEndHandler) {
     // Event to handle keypress i/o
-    this.movementHandler = movementHandler;
+    this.newClientHandler = newClientHandler
+    this.clientDataHandler = clientDataHandler
+    this.clientEndHandler = clientEndHandler
     // this.screen.on('keypress', keyPressHandler)
     // this.screen.key(['escape', 'q', 'C-c'], quitHandler)
     // this.screen.key(['enter'], enterHandler)
