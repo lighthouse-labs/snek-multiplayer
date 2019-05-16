@@ -21,8 +21,7 @@ class UserInterface {
     // Create the boxes
     this.gameBox = this.createGameBox()
     this.scoreBox = this.createScoreBox()
-    this.gameOverBox = this.createGameOverBox()
-
+    
     this.gameContainer = this.blessed.box(this.gameBox)
     this.scoreContainer = this.blessed.box(this.scoreBox)
   }
@@ -56,29 +55,6 @@ class UserInterface {
     }
   }
 
-  createGameOverBox() {
-    return {
-      parent: this.screen,
-      top: 'center',
-      left: 'center',
-      width: 20,
-      height: 6,
-      tags: true,
-      valign: 'middle',
-      content: `{center}Game Over!\n\nPress enter to try again{/center}`,
-      border: {
-        type: 'line',
-      },
-      style: {
-        fg: 'black',
-        bg: 'magenta',
-        border: {
-          fg: '#ffffff',
-        },
-      },
-    }
-  }
-
   bindHandlers(keyPressHandler, quitHandler, enterHandler) {
     // Event to handle keypress i/o
     this.screen.on('keypress', keyPressHandler)
@@ -104,11 +80,6 @@ class UserInterface {
   // Keep track of how many dots have been consumed and write to the score box
   updateScore(score) {
     this.scoreContainer.setLine(0, `{bold}Score:{/bold} ${score}`)
-  }
-
-  // BSOD on game over
-  gameOverScreen() {
-    this.gameContainer = this.blessed.box(this.gameOverBox)
   }
 
   // Set to initial screen

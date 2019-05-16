@@ -133,7 +133,8 @@ class Game {
   }
 
   generateDots() {
-    const diff = this.snakes.length - this.dots.length
+    const maxDots = Math.ceil(this.snakes.length / 2)
+    const diff = maxDots - this.dots.length
     for (let i = 0; i < diff; i++) this.generateDot()
   }
 
@@ -145,8 +146,8 @@ class Game {
   }
 
   drawSnake(snake) {
-    snake.segments.forEach(segment => {
-      this.ui.draw(segment, snake.color)
+    snake.segments.forEach((segment, i) => {
+      this.ui.draw(segment, i === 0 ? 'gray' : snake.color)
     })
   }
 
@@ -155,11 +156,6 @@ class Game {
     for (const dot of this.dots) {
       this.ui.draw(dot, dot.color)
     }
-  }
-
-  showGameOverScreen() {
-    this.ui.gameOverScreen()
-    this.ui.render()
   }
 
   removeSnake(snake, index) {
@@ -196,15 +192,6 @@ class Game {
 
   tick() {
     this.checkPlayerHits()
-
-    // if (this.isGameOver()) {
-    //   this.showGameOverScreen()
-    //   clearInterval(this.timer)
-    //   this.timer = null
-
-    //   return
-    // }
-
     this.ui.clearScreen()
     this.generateDots()
     this.drawDots()
