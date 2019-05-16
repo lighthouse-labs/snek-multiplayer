@@ -6,8 +6,19 @@ const DIRECTIONS = {
   left: { x: -1, y: 0 },
 }
 const INITIAL_SNAKE_SIZE = 4
-const SNAKE_COLOR = '#0F0FFF'
-const DOT_COLOR = 'red'
+const SNAKE_COLORS = [
+  '#0F0FFF', 
+  '#0FFFFF',
+  '#0FFFF0',
+  '#0F0FF0'
+]
+const DOT_COLORS = [
+  'red',
+  'green',
+  'blue',
+  'white',
+  'gray'
+]
 
 const SNAKE_COLLISIONS = true
 
@@ -15,7 +26,7 @@ module.exports = {
   GAME_SPEED,
   DIRECTIONS,
   INITIAL_SNAKE_SIZE,
-  SNAKE_COLOR,
-  DOT_COLOR,
+  SNAKE_COLORS,
+  DOT_COLORS,
   SNAKE_COLLISIONS
 }

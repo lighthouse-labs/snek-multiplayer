@@ -1,13 +1,13 @@
 const {
   GAME_SPEED,
-  DIRECTIONS,
   INITIAL_SNAKE_SIZE,
-  SNAKE_COLOR,
-  DOT_COLOR,
+  SNAKE_COLORS,
+  DOT_COLORS,
   SNAKE_COLLISIONS
 } = require('./constants')
 
 const { Snake } = require('./Snake')
+const { Dot } = require('./Dot')
 
 /**
  * @class Game
@@ -27,8 +27,7 @@ class Game {
     // User interface class for all i/o operations
     this.ui = ui
     this.server = server
-    this.snakes = []
-
+    
     this.reset()
 
     // Bind handlers to UI so we can detect input change from the Game class
@@ -48,12 +47,12 @@ class Game {
   reset() {
     // Set up initial state
     this.snakes = []
-    this.dot = {}
+    this.dots = []
     this.score = 0
     this.timer = null
 
     // Generate the first dot before the game begins
-    this.generateDot()
+    // this.generateDot()
     this.ui.resetScore()
     this.ui.render()
   }
@@ -73,15 +72,30 @@ class Game {
     const snake = new Snake(
       client,
       INITIAL_SNAKE_SIZE, 
-      SNAKE_COLOR, 
+      this.randomItem(SNAKE_COLORS), 
       this.snakeMoved.bind(this)
     )
     this.snakes.push(snake)
   }
 
+  randomItem(arr) {
+    return arr[Math.floor(Math.random() * arr.length)]
+  }
+
   playerLeft(client) {
     const index = this.snakes.findIndex(s => s.client === client)
     if (index >= 0) this.removeSnake(this.snakes[index], index)
+  }
+
+  checkDotHits(position, snake) {
+    for (const [i, dot] of this.dots.entries()) {
+      if (position.x === dot.x && position.y === dot.y) {
+        snake.scored()
+        this.ui.updateScore(snake.score)
+        this.removeDot(dot, i)
+        return
+      }
+    }
   }
 
   /**
@@ -94,27 +108,33 @@ class Game {
    */
   snakeMoved(position, snake) {
     // If the snake lands on a dot, increase the score and generate a new dot
-    if (position.x === this.dot.x && position.y === this.dot.y) {
-      snake.scored()
-      this.ui.updateScore(snake.score)
-      this.generateDot()
-    }
+    // check collisions with Dots
+    this.checkDotHits(position, snake)
   }
 
-  generateRandomPixelCoord(min, max) {
+  randomNum(min, max) {
     // Get a random coordinate from 0 to max container height/width
     return Math.round(Math.random() * (max - min) + min)
   }
 
   generateDot() {
     // Generate a dot at a random x/y coordinate
-    this.dot.x = this.generateRandomPixelCoord(0, this.ui.gameContainer.width - 1)
-    this.dot.y = this.generateRandomPixelCoord(1, this.ui.gameContainer.height - 1)
-
+    const x = this.randomNum(0, this.ui.gameContainer.width - 1)
+    const y = this.randomNum(1, this.ui.gameContainer.height - 1)
+    
     // If the pixel is on a snake, regenerate the dot
-    if (this.snakes.some(s => s.isAt(this.dot))) {
-      this.generateDot()
-    }
+    if (this.snakes.some(s => s.isAt({ x, y }))) {
+      return this.generateDot()
+    } 
+    // TODO: If the pixel is on another dot, regenerate the dot
+    
+    const dot = new Dot(x, y, this.randomItem(DOT_COLORS))
+    this.dots.push(dot)
+  }
+
+  generateDots() {
+    const diff = this.snakes.length - this.dots.length
+    for (let i = 0; i < diff; i++) this.generateDot()
   }
 
   drawSnakes() {
@@ -132,7 +152,9 @@ class Game {
 
   drawDots() {
     // Render the dot as a pixel
-    this.ui.draw(this.dot, DOT_COLOR)
+    for (const dot of this.dots) {
+      this.ui.draw(dot, dot.color)
+    }
   }
 
   showGameOverScreen() {
@@ -144,6 +166,12 @@ class Game {
     snake.bye()
     if (index !== undefined && index >= 0) {
       this.snakes.splice(index, 1)
+    }
+  }
+
+  removeDot(dot, index) {
+    if (index !== undefined && index >= 0) {
+      this.dots.splice(index, 1)
     }
   }
 
@@ -178,6 +206,7 @@ class Game {
     // }
 
     this.ui.clearScreen()
+    this.generateDots()
     this.drawDots()
     this.drawSnakes()
     this.ui.render()
