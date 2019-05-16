@@ -9,10 +9,13 @@ const INITIAL_SNAKE_SIZE = 4
 const SNAKE_COLOR = '#0F0FFF'
 const DOT_COLOR = 'red'
 
+const SNAKE_COLLISIONS = true
+
 module.exports = {
   GAME_SPEED,
   DIRECTIONS,
   INITIAL_SNAKE_SIZE,
   SNAKE_COLOR,
   DOT_COLOR,
+  SNAKE_COLLISIONS
 }

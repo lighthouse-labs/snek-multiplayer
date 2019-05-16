@@ -20,6 +20,11 @@ class Snake {
     }
   }
 
+  hitSnake(otherSnake) {
+    const head = this.segments[0];
+    return otherSnake.segments.some(seg => head.x === seg.x && head.y === seg.y)
+  }
+
   hit(maxX, maxY) {
     // If the snake collides with itself, end the game
     const selfCollision = this.selfCollision()

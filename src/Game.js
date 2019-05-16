@@ -4,6 +4,7 @@ const {
   INITIAL_SNAKE_SIZE,
   SNAKE_COLOR,
   DOT_COLOR,
+  SNAKE_COLLISIONS
 } = require('./constants')
 
 const { Snake } = require('./Snake')
@@ -150,9 +151,17 @@ class Game {
     const width = this.ui.gameContainer.width
     const height = this.ui.gameContainer.height
 
-    for (let [index, snake] of this.snakes.entries()) {
+    for (let [i, snake] of this.snakes.entries()) {
       if (snake.hit(width, height)) {
-        return this.removeSnake(snake, index)
+        return this.removeSnake(snake, i)
+      }
+
+      if (SNAKE_COLLISIONS) {
+        for (let [j, otherSnake] of this.snakes.entries()) {
+          if (i !== j && snake.hitSnake(otherSnake)) {
+            return this.removeSnake(snake, i)
+          }
+        }
       }
     }
   }
