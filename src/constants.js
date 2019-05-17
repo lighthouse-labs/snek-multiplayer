@@ -21,6 +21,7 @@ const DOT_COLORS = [
 ]
 
 const SNAKE_COLLISIONS = true
+const MAX_IDLE_TIME = 2000 // ms
 
 module.exports = {
   GAME_SPEED,
@@ -28,5 +29,6 @@ module.exports = {
   INITIAL_SNAKE_SIZE,
   SNAKE_COLORS,
   DOT_COLORS,
-  SNAKE_COLLISIONS
+  SNAKE_COLLISIONS,
+  MAX_IDLE_TIME
 }

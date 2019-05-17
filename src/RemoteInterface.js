@@ -1,3 +1,7 @@
+const {
+  MAX_IDLE_TIME
+} = require('./constants')
+
 const net = require('net');
 const PORT = 50541;
 
@@ -26,23 +30,41 @@ class RemoteInterface {
       })
   }
 
+  idleBoot(client) {
+    // TODO: some message to the client first?
+    client.write('you ded cuz you idled\n', () => client.end())
+    // client.end()
+  }
+
+  resetIdleTimer(client) {
+    if (client.idleTimer) clearTimeout(client.idleTimer)
+    client.idleTimer = setTimeout(
+      this.idleBoot.bind(this, client), 
+      MAX_IDLE_TIME
+    )
+  }
+
   handleNewClient(client) {
     // process.stdout.write('\x07')
-    this.clients.push(client)
-    
     client.setEncoding('utf8')
+    this.clients.push(client)
+    this.resetIdleTimer(client)
     
-    if (this.newClientHandler) 
-      this.newClientHandler(client)
+    if (this.newClientHandler) this.newClientHandler(client)
     
-    client.on('data', (data) => {
-      const key = { name: data }
-      if (this.clientDataHandler) this.clientDataHandler(key, client)
-    })
+    client.on('data', this.handleClientData.bind(this, client))
+    client.on('end', this.handleClientEnded.bind(this, client))
+  }
 
-    client.on('end', () => {
-      if (this.clientEndHandler) this.clientEndHandler(client)
-    })
+  handleClientData(client, data) {
+    if (this.clientDataHandler) { 
+      if (this.clientDataHandler(data, client)) this.resetIdleTimer(client)
+    }
+  }
+
+  handleClientEnded(client) {
+    if (client.idleTimer) clearTimeout(client.idleTimer)
+    if (this.clientEndHandler) this.clientEndHandler(client)
   }
 
   bindHandlers(clientDataHandler, newClientHandler, clientEndHandler) {

@@ -1,5 +1,5 @@
 const {
-  DIRECTIONS,
+  DIRECTIONS
 } = require('./constants')
 
 class Snake {
@@ -11,6 +11,7 @@ class Snake {
     this.color = color
     this.snakeMoved = onMove
     this.reset()
+    this.idleTimer = null
   }
 
   reset() {
@@ -42,20 +43,32 @@ class Snake {
     )
   }
 
+  // TODO: rename to be more generic
   changeDirection(dir) {
+    let valid = false
     if ((dir === 'up' || dir === 'w') && this.currentDirection !== 'down') {
       this.currentDirection = 'up'
-    }
-    if ((dir === 'down' || dir === 's') && this.currentDirection !== 'up') {
+      valid = true
+    } else if ((dir === 'down' || dir === 's') && this.currentDirection !== 'up') {
       this.currentDirection = 'down'
-    }
-    if ((dir === 'left' || dir === 'a') && this.currentDirection !== 'right') {
+      valid = true
+    } else if ((dir === 'left' || dir === 'a') && this.currentDirection !== 'right') {
       this.currentDirection = 'left'
-    }
-    if ((dir === 'right' || dir === 'd') && this.currentDirection !== 'left') {
+      valid = true
+    } else if ((dir === 'right' || dir === 'd') && this.currentDirection !== 'left') {
       this.currentDirection = 'right'
+      valid = true
     }
-    this.move()
+    
+    if (valid) {
+      this.move()
+      return true
+    }
+    return false
+  }
+
+  changeName(name) {
+    this.name = name
   }
 
   selfCollision() {
@@ -78,9 +91,12 @@ class Snake {
     return false
   }
 
-  bye() {
-    // this.client.write('you ded\n', () => this.client.end())
-    this.client.end()
+  bye(message) {
+    if (message) {
+      this.client.write(`${message}\n`, () => this.client.end())
+    } else {
+      this.client.end()
+    }
   }
 
   move() {

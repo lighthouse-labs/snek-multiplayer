@@ -38,7 +38,7 @@ class Game {
     )
 
     this.server.bindHandlers(
-      this.changeDirection.bind(this),
+      this.handlePlayerInput.bind(this),
       this.newPlayer.bind(this),
       this.playerLeft.bind(this)
     )
@@ -57,15 +57,30 @@ class Game {
     this.ui.render()
   }
 
+  handlePlayerInput(input, client) {
+    const snake = this.snakes.find(s => s.client === client)
+    if (!snake) return false
+    
+    const dir = input.match(/Move: (.*)/)
+    const name = input.match(/Name: (.*)/)
+
+    if (dir) {
+      return snake.changeDirection(dir[1])
+    } else if (name) {
+      return snake.changeName(name[1].trim(0, 2))
+    } 
+    
+    client.write('Huh?\n');
+    return false
+  }
+
   /**
    * Support WASD and arrow key controls. Update the direction of the snake, and
    * do not allow reversal.
    */
-  changeDirection(key, client) {
-    const snake = this.snakes.find(s => s.client === client)
-    if (snake) {
-      snake.changeDirection(key.name)
-    }
+  changeDirection(key, snake) {
+    
+    return false
   }
 
   newPlayer(client) {
@@ -158,8 +173,8 @@ class Game {
     }
   }
 
-  removeSnake(snake, index) {
-    snake.bye()
+  removeSnake(snake, index, message) {
+    snake.bye(message)
     if (index !== undefined && index >= 0) {
       this.snakes.splice(index, 1)
     }
@@ -177,13 +192,13 @@ class Game {
 
     for (let [i, snake] of this.snakes.entries()) {
       if (snake.hit(width, height)) {
-        return this.removeSnake(snake, i)
+        return this.removeSnake(snake, i, 'you crashed, so you ded.')
       }
 
       if (SNAKE_COLLISIONS) {
         for (let [j, otherSnake] of this.snakes.entries()) {
           if (i !== j && snake.hitSnake(otherSnake)) {
-            return this.removeSnake(snake, i)
+            return this.removeSnake(snake, i, 'you hit another snake, so you ded.')
           }
         }
       }
