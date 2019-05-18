@@ -1,24 +1,51 @@
 const {
-  DIRECTIONS
+  DIRECTIONS,
+  MESSAGE_TIMEOUT
 } = require('./constants')
 
 class Snake {
-  constructor(client, initialSize, color, onMove) {
+  constructor(client, initialSize, initialLocation, color, autoMove, onMove) {
     this.client = client
-    this.initialSize = initialSize
-    this.currentDirection = 'right'
+    this.size = initialSize
+    this.growBy = 0
     this.score = 0
     this.color = color
     this.snakeMoved = onMove
-    this.reset()
+    this.autoMove = autoMove
+    this.currentDirection = 'left'
+    this.setStartPos(initialLocation)
     this.idleTimer = null
+    this.message   = null
+    this.name      = null
   }
 
-  reset() {
+  setStartPos(pos){
+    this.setHead(pos)
+    this.generateBody()
+  }
+
+  setHead(pos) {
     this.segments = []
-    for (let i = this.initialSize; i >= 0; i--) {
-      this.segments[this.initialSize - i] = { x: i, y: 0 }
+    this.segments[0] = pos
+  }
+
+  generateBody() {
+    let prev = this.segments[0] // start with head and work back to tail
+    for (let i = 1; i <= this.size + 1; i++) {
+      prev = {
+        x: prev.x - DIRECTIONS[this.currentDirection].x,
+        y: prev.y - DIRECTIONS[this.currentDirection].y,
+      }
+      this.segments[i] = prev
     }
+  }
+
+  setMessage(msg) {
+    this.message = msg
+    if (this.messageTimeout) clearTimeout(this.messageTimeout)
+    this.messageTimeout = setTimeout(() => { 
+      this.message = null 
+    }, MESSAGE_TIMEOUT)
   }
 
   hitSnake(otherSnake) {
@@ -43,7 +70,10 @@ class Snake {
     )
   }
 
-  // TODO: rename to be more generic
+  /**
+   * Support movement controls. Update the direction of the snake, and
+   * do not allow reversal.
+   */
   changeDirection(dir) {
     let valid = false
     if ((dir === 'up' || dir === 'w') && this.currentDirection !== 'down') {
@@ -61,7 +91,7 @@ class Snake {
     }
     
     if (valid) {
-      this.move()
+      if (!this.autoMove) this.move()
       return true
     }
     return false
@@ -69,6 +99,7 @@ class Snake {
 
   changeName(name) {
     this.name = name
+    this.setMessage('Hey')
   }
 
   selfCollision() {
@@ -80,8 +111,8 @@ class Snake {
   }
 
   // woohoo!
-  scored() {
-    this.score++
+  scored(points = 1) {
+    this.score += points
   }
 
   isAt(position) {
@@ -105,16 +136,13 @@ class Snake {
       x: this.segments[0].x + DIRECTIONS[this.currentDirection].x,
       y: this.segments[0].y + DIRECTIONS[this.currentDirection].y,
     }
-
     this.segments.unshift(head)
-    
-    this.snakeMoved(this.segments[0], this)
-    
-    // uncomment if we want the snake to grow
-    // else {
-      // Otherwise, slither
+    if (this.snakeMoved) this.snakeMoved(this.segments[0], this)
+    if (this.growBy > 0) {
+      this.growBy -= 1;
+    } else {
       this.segments.pop()
-    //}
+    }
   }
 }
 

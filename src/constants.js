@@ -1,4 +1,4 @@
-const GAME_SPEED = 20
+const GAME_SPEED = 50
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
   down: { x: 0, y: 1 },
@@ -13,15 +13,18 @@ const SNAKE_COLORS = [
   '#0F0FF0'
 ]
 const DOT_COLORS = [
-  'red',
-  'green',
-  'blue',
-  'white',
-  'gray'
+  'red'
 ]
 
 const SNAKE_COLLISIONS = true
-const MAX_IDLE_TIME = 10000 // ms
+const MAX_IDLE_TIME = 1000000 // ms
+
+// how long each Player/Snake's broadcast message stays on for
+const MESSAGE_TIMEOUT = 9000 // ms
+
+// auto move is the usual snake mode
+// its off, meaning snakes are still until moved by players
+const AUTO_MOVE_DEFAULT = false
 
 module.exports = {
   GAME_SPEED,
@@ -30,5 +33,7 @@ module.exports = {
   SNAKE_COLORS,
   DOT_COLORS,
   SNAKE_COLLISIONS,
-  MAX_IDLE_TIME
+  MAX_IDLE_TIME,
+  MESSAGE_TIMEOUT,
+  AUTO_MOVE_DEFAULT
 }

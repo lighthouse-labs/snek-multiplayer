@@ -3,9 +3,11 @@ const {
   INITIAL_SNAKE_SIZE,
   SNAKE_COLORS,
   DOT_COLORS,
-  SNAKE_COLLISIONS
+  SNAKE_COLLISIONS,
+  AUTO_MOVE_DEFAULT
 } = require('./constants')
 
+const { randomNum } = require('./utils')
 const { Snake } = require('./Snake')
 const { Dot } = require('./Dot')
 
@@ -27,6 +29,8 @@ class Game {
     // User interface class for all i/o operations
     this.ui = ui
     this.server = server
+
+    this.autoMove = AUTO_MOVE_DEFAULT
     
     this.reset()
 
@@ -63,34 +67,51 @@ class Game {
     
     const dir = input.match(/Move: (.*)/)
     const name = input.match(/Name: (.*)/)
+    const say  = input.match(/Say: (.*)/)
 
     if (dir) {
       return snake.changeDirection(dir[1])
     } else if (name) {
-      return snake.changeName(name[1].trim(0, 2))
-    } 
+      return snake.changeName(name[1].trim().substring(0, 2))
+    } else if (say) {
+      return snake.setMessage(say[1].trim().substring(0, 20))
+    }
     
     client.write('Huh?\n');
     return false
   }
 
-  /**
-   * Support WASD and arrow key controls. Update the direction of the snake, and
-   * do not allow reversal.
-   */
-  changeDirection(key, snake) {
+  safeSnakeStartingCoords() {
+    let attempts = 0;
+
+    while(attempts < 100) {
+      // console.log('trying: ', attempts);
+      const x = randomNum(0 + INITIAL_SNAKE_SIZE, this.ui.gameContainer.width - 1 - INITIAL_SNAKE_SIZE)
+      const y = randomNum(0 + INITIAL_SNAKE_SIZE, this.ui.gameContainer.height - 1 - INITIAL_SNAKE_SIZE)
+      
+      if (this.isSafe(x, y)) return { x, y }
+      attempts += 1
+    }
     
-    return false
+    // we failed to find a safe starting pos
+    return false 
   }
 
   newPlayer(client) {
-    const snake = new Snake(
-      client,
-      INITIAL_SNAKE_SIZE, 
-      this.randomItem(SNAKE_COLORS), 
-      this.snakeMoved.bind(this)
-    )
-    this.snakes.push(snake)
+    const coords = this.safeSnakeStartingCoords()
+    if (coords) {
+      const snake = new Snake(
+        client,
+        INITIAL_SNAKE_SIZE, 
+        coords,
+        this.randomItem(SNAKE_COLORS),
+        this.autoMove,
+        this.snakeMoved.bind(this)
+      )
+      this.snakes.push(snake)
+    } else {
+      client.write("No space for you, try again soon!\n", () => client.end())
+    }
   }
 
   randomItem(arr) {
@@ -106,6 +127,7 @@ class Game {
     for (const [i, dot] of this.dots.entries()) {
       if (position.x === dot.x && position.y === dot.y) {
         snake.scored()
+        snake.growBy += 1
         this.ui.updateScore(snake.score)
         this.removeDot(dot, i)
         return
@@ -127,22 +149,21 @@ class Game {
     this.checkDotHits(position, snake)
   }
 
-  randomNum(min, max) {
-    // Get a random coordinate from 0 to max container height/width
-    return Math.round(Math.random() * (max - min) + min)
+  isSafe(x, y) {
+    // If the pixel is on a snake, regenerate the dot
+    return(
+      !this.snakes.some(s => s.isAt({ x, y })) &&
+      !this.dots.some(d => d.isAt({x, y}))
+    )
   }
 
   generateDot() {
     // Generate a dot at a random x/y coordinate
-    const x = this.randomNum(0, this.ui.gameContainer.width - 1)
-    const y = this.randomNum(1, this.ui.gameContainer.height - 1)
+    const x = randomNum(0, this.ui.gameContainer.width - 1)
+    const y = randomNum(1, this.ui.gameContainer.height - 1)
     
-    // If the pixel is on a snake, regenerate the dot
-    if (this.snakes.some(s => s.isAt({ x, y }))) {
-      return this.generateDot()
-    } 
-    // TODO: If the pixel is on another dot, regenerate the dot
-    
+    if (!this.isSafe(x, y)) return this.generateDot()
+
     const dot = new Dot(x, y, this.randomItem(DOT_COLORS))
     this.dots.push(dot)
   }
@@ -164,6 +185,11 @@ class Game {
     snake.segments.forEach((segment, i) => {
       this.ui.draw(segment, i === 0 ? 'gray' : snake.color)
     })
+    if (snake.message) {
+      const msg = `${snake.name}: ${snake.message}`
+      const segment = snake.segments[0]
+      this.ui.text({x: segment.x - 1, y: segment.y - 1}, msg, snake.color)
+    }
   }
 
   drawDots() {
@@ -205,11 +231,16 @@ class Game {
     }
   }
 
+  moveSnakes() {
+    this.snakes.forEach(s => s.move.bind(s)())
+  }
+
   tick() {
     this.checkPlayerHits()
     this.ui.clearScreen()
     this.generateDots()
     this.drawDots()
+    if (this.autoMove) this.moveSnakes()
     this.drawSnakes()
     this.ui.render()
   }

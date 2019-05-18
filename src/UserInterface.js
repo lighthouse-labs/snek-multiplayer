@@ -77,6 +77,18 @@ class UserInterface {
     })
   }
 
+  text(coord, msg, color) {
+    this.blessed.text({
+      content: msg,
+      parent: this.gameContainer,
+      top: coord.y,
+      left: coord.x,
+      style: {
+        fg: color || 'white'
+      }
+    })
+  }
+
   // Keep track of how many dots have been consumed and write to the score box
   updateScore(score) {
     this.scoreContainer.setLine(0, `{bold}Score:{/bold} ${score}`)
