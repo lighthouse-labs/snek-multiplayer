@@ -14,7 +14,8 @@ class Snake {
     this.autoMove = autoMove
     this.currentDirection = 'left'
     this.setStartPos(initialLocation)
-    this.idleTimer = null
+
+    // these are set later
     this.message   = null
     this.name      = null
   }

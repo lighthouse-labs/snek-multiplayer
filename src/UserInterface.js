@@ -1,4 +1,7 @@
 const blessed = require('blessed')
+const ip = require('ip')
+
+const { PORT } = require('./constants')
 
 /**
  * @class UserInterface
@@ -91,7 +94,8 @@ class UserInterface {
 
   // Keep track of how many dots have been consumed and write to the score box
   updateScore(score) {
-    this.scoreContainer.setLine(0, `{bold}Score:{/bold} ${score}`)
+    // this.scoreContainer.setLine(0, `{bold}Score:{/bold} ${score}`)
+    this.scoreContainer.setLine(0, `{bold}IP:{/bold} ${ip.address()} {bold}PORT:{/bold} ${PORT}`)
   }
 
   // Set to initial screen

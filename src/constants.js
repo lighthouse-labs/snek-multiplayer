@@ -1,3 +1,5 @@
+const PORT = 50541
+
 const GAME_SPEED = 50
 const DIRECTIONS = {
   up: { x: 0, y: -1 },
@@ -15,9 +17,11 @@ const SNAKE_COLORS = [
 const DOT_COLORS = [
   'red'
 ]
+const MAX_PLAYER_NAME_LENGTH = 3
+const MAX_PLAYER_MSG_LENGTH = 20
 
 const SNAKE_COLLISIONS = true
-const MAX_IDLE_TIME = 1000000 // ms
+const MAX_IDLE_TIMEOUT = 10000 // ms
 
 // how long each Player/Snake's broadcast message stays on for
 const MESSAGE_TIMEOUT = 9000 // ms
@@ -33,7 +37,8 @@ module.exports = {
   SNAKE_COLORS,
   DOT_COLORS,
   SNAKE_COLLISIONS,
-  MAX_IDLE_TIME,
+  MAX_IDLE_TIMEOUT,
   MESSAGE_TIMEOUT,
-  AUTO_MOVE_DEFAULT
+  AUTO_MOVE_DEFAULT,
+  PORT
 }

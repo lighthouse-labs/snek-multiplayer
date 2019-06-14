@@ -1,9 +1,9 @@
 const {
-  MAX_IDLE_TIME
+  MAX_IDLE_TIMEOUT,
+  PORT
 } = require('./constants')
 
 const net = require('net');
-const PORT = 50541;
 
 /**
  * @class UserInterface
@@ -20,7 +20,8 @@ class RemoteInterface {
   }
 
   launchServer() {
-    this.server = net.createServer(this.handleNewClient.bind(this))
+    this.server = net.createServer()
+      .on('connection', this.handleNewClient.bind(this))
       .on('error', (err) => {
         // handle errors here
         throw err
@@ -36,11 +37,11 @@ class RemoteInterface {
     // client.end()
   }
 
-  resetIdleTimer(client) {
+  resetIdleTimer(client, time) {
     if (client.idleTimer) clearTimeout(client.idleTimer)
     client.idleTimer = setTimeout(
       this.idleBoot.bind(this, client), 
-      MAX_IDLE_TIME
+      time
     )
   }
 
@@ -48,7 +49,7 @@ class RemoteInterface {
     // process.stdout.write('\x07')
     client.setEncoding('utf8')
     this.clients.push(client)
-    this.resetIdleTimer(client)
+    this.resetIdleTimer(client, MAX_IDLE_TIMEOUT / 2)
     
     if (this.newClientHandler) this.newClientHandler(client)
     
@@ -58,7 +59,7 @@ class RemoteInterface {
 
   handleClientData(client, data) {
     if (this.clientDataHandler) { 
-      if (this.clientDataHandler(data, client)) this.resetIdleTimer(client)
+      if (this.clientDataHandler(data, client)) this.resetIdleTimer(client, MAX_IDLE_TIMEOUT)
     }
   }
 

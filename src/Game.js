@@ -4,7 +4,9 @@ const {
   SNAKE_COLORS,
   DOT_COLORS,
   SNAKE_COLLISIONS,
-  AUTO_MOVE_DEFAULT
+  AUTO_MOVE_DEFAULT,
+  MAX_PLAYER_NAME_LENGTH,
+  MAX_PLAYER_MSG_LENGTH
 } = require('./constants')
 
 const { randomNum } = require('./utils')
@@ -72,9 +74,9 @@ class Game {
     if (dir) {
       return snake.changeDirection(dir[1])
     } else if (name) {
-      return snake.changeName(name[1].trim().substring(0, 2))
+      return snake.changeName(name[1].trim().substring(0, MAX_PLAYER_NAME_LENGTH))
     } else if (say) {
-      return snake.setMessage(say[1].trim().substring(0, 20))
+      return snake.setMessage(say[1].trim().substring(0, MAX_PLAYER_MSG_LENGTH))
     }
     
     client.write('Huh?\n');
@@ -186,7 +188,7 @@ class Game {
       this.ui.draw(segment, i === 0 ? 'gray' : snake.color)
     })
     if (snake.message) {
-      const msg = `${snake.name}: ${snake.message}`
+      const msg = snake.name ? `${snake.name}: ${snake.message}` : snake.message
       const segment = snake.segments[0]
       this.ui.text({x: segment.x - 1, y: segment.y - 1}, msg, snake.color)
     }

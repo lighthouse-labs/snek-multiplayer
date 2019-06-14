@@ -15,7 +15,8 @@
     "play": "node play.js"
   },
   "dependencies": {
-    "blessed": "^0.1.81"
+    "blessed": "^0.1.81",
+    "ip": "^1.1.5"
   },
   "licence": "MIT",
   "keywords": [
