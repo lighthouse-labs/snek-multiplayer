@@ -9,7 +9,7 @@ const DIRECTIONS = {
 }
 const INITIAL_SNAKE_SIZE = 4
 const SNAKE_COLORS = [
-  '#0F0FFF', 
+  '#0F0FFF',
   '#0FFFFF',
   '#0FFFF0',
   '#0F0FF0'
@@ -17,6 +17,8 @@ const SNAKE_COLORS = [
 const DOT_COLORS = [
   'red'
 ]
+const BG_COLOR = 'white'
+
 const MAX_PLAYER_NAME_LENGTH = 3
 const MAX_PLAYER_MSG_LENGTH = 20
 

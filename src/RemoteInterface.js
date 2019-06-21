@@ -40,7 +40,7 @@ class RemoteInterface {
   resetIdleTimer(client, time) {
     if (client.idleTimer) clearTimeout(client.idleTimer)
     client.idleTimer = setTimeout(
-      this.idleBoot.bind(this, client), 
+      this.idleBoot.bind(this, client),
       time
     )
   }
@@ -50,15 +50,15 @@ class RemoteInterface {
     client.setEncoding('utf8')
     this.clients.push(client)
     this.resetIdleTimer(client, MAX_IDLE_TIMEOUT / 2)
-    
+
     if (this.newClientHandler) this.newClientHandler(client)
-    
+
     client.on('data', this.handleClientData.bind(this, client))
     client.on('end', this.handleClientEnded.bind(this, client))
   }
 
   handleClientData(client, data) {
-    if (this.clientDataHandler) { 
+    if (this.clientDataHandler) {
       if (this.clientDataHandler(data, client)) this.resetIdleTimer(client, MAX_IDLE_TIMEOUT)
     }
   }

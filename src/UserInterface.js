@@ -1,7 +1,7 @@
 const blessed = require('blessed')
 const ip = require('ip')
 
-const { PORT } = require('./constants')
+const { PORT, BG_COLOR } = require('./constants')
 
 /**
  * @class UserInterface
@@ -24,7 +24,7 @@ class UserInterface {
     // Create the boxes
     this.gameBox = this.createGameBox()
     this.scoreBox = this.createScoreBox()
-    
+
     this.gameContainer = this.blessed.box(this.gameBox)
     this.scoreContainer = this.blessed.box(this.scoreBox)
   }
@@ -37,8 +37,8 @@ class UserInterface {
       width: '100%',
       height: '100%-1',
       style: {
-        fg: 'black',
-        bg: 'black',
+        fg: BG_COLOR,
+        bg: BG_COLOR,
       },
     }
   }
