@@ -23,10 +23,10 @@ const MAX_PLAYER_NAME_LENGTH = 3
 const MAX_PLAYER_MSG_LENGTH = 20
 
 const SNAKE_COLLISIONS = true
-const MAX_IDLE_TIMEOUT = 10000 // ms
+const MAX_IDLE_TIMEOUT = 99000 // ms
 
 // how long each Player/Snake's broadcast message stays on for
-const MESSAGE_TIMEOUT = 9000 // ms
+const MESSAGE_TIMEOUT = 5000 // ms
 
 // auto move is the usual snake mode
 // its off, meaning snakes are still until moved by players
