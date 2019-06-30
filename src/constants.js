@@ -9,10 +9,34 @@ const DIRECTIONS = {
 }
 const INITIAL_SNAKE_SIZE = 4
 const SNAKE_COLORS = [
-  '#0F0FFF',
-  '#0FFFFF',
-  '#0FFFF0',
-  '#0F0FF0'
+  '#0F0FFF', // blue
+  '#0FFFFF', // bright blue
+  '#0F0FF0', // navy blue
+  '#018E42', // green
+  '#B75D69', // pink-ish
+  '#1B5299', // blue
+  '#9FC2CC', // lighter blue
+  '#E3C16F', // beige
+  '#729B79', // seafoam green (renders as mild gray)
+  '#2E2C2F', // dark gray
+  '#9EE493', // brighter green
+  '#BA1200', // fancy red
+  '#725AC1', // purple
+  '#E1BC29', // yellow
+  '#7768AE', // lighter purple
+  '#F038FF', // magenta
+  '#E2EF70', // keylime pie?
+  '#EF709D', // pink
+  '#955E42', // burnt orange
+  '#DB7F67', // orange
+  '#DBAD6A', // light orange
+  '#628395', // pale blue / teal
+  '#7C898B', // gray
+  '#FB5607', // orange proper
+  '#FF006E', // pink proper
+  '#8338EC', // purple proper
+  '#FFBE0B', // yellow proper
+  '#3A86FF'  // light blue
 ]
 const DOT_COLORS = [
   'red'
