@@ -47,7 +47,7 @@ const MAX_PLAYER_NAME_LENGTH = 3
 const MAX_PLAYER_MSG_LENGTH = 20
 
 const SNAKE_COLLISIONS = true
-const MAX_IDLE_TIMEOUT = 5000 // ms
+const MAX_IDLE_TIMEOUT = 15000 // ms
 
 // how long each Player/Snake's broadcast message stays on for
 const MESSAGE_TIMEOUT = 5000 // ms
