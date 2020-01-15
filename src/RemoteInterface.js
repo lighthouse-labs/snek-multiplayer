@@ -32,9 +32,11 @@ class RemoteInterface {
   }
 
   idleBoot(client) {
-    // TODO: some message to the client first?
-    client.write('you ded cuz you idled\n', () => client.end())
-    // client.end()
+    try {
+      client.write('you ded cuz you idled\n', () => client.end())
+    } catch (e) {
+      // nothing to do really.
+    }
   }
 
   resetIdleTimer(client, time) {

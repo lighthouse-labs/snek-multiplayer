@@ -33,7 +33,7 @@ class Game {
     this.server = server
 
     this.autoMove = AUTO_MOVE_DEFAULT
-    
+
     this.reset()
 
     // Bind handlers to UI so we can detect input change from the Game class
@@ -66,7 +66,7 @@ class Game {
   handlePlayerInput(input, client) {
     const snake = this.snakes.find(s => s.client === client)
     if (!snake) return false
-    
+
     const dir = input.match(/Move: (.*)/)
     const name = input.match(/Name: (.*)/)
     const say  = input.match(/Say: (.*)/)
@@ -78,8 +78,13 @@ class Game {
     } else if (say) {
       return snake.setMessage(say[1].trim().substring(0, MAX_PLAYER_MSG_LENGTH))
     }
-    
-    client.write('Huh?\n');
+
+    try {
+      client.write('Huh?\n');
+    } catch (e) {
+      // nothing to do really.
+    }
+
     return false
   }
 
@@ -90,13 +95,13 @@ class Game {
       // console.log('trying: ', attempts);
       const x = randomNum(0 + INITIAL_SNAKE_SIZE, this.ui.gameContainer.width - 1 - INITIAL_SNAKE_SIZE)
       const y = randomNum(0 + INITIAL_SNAKE_SIZE, this.ui.gameContainer.height - 1 - INITIAL_SNAKE_SIZE)
-      
+
       if (this.isSafe(x, y)) return { x, y }
       attempts += 1
     }
-    
+
     // we failed to find a safe starting pos
-    return false 
+    return false
   }
 
   newPlayer(client) {
@@ -104,7 +109,7 @@ class Game {
     if (coords) {
       const snake = new Snake(
         client,
-        INITIAL_SNAKE_SIZE, 
+        INITIAL_SNAKE_SIZE,
         coords,
         this.randomItem(SNAKE_COLORS),
         this.autoMove,
@@ -112,7 +117,11 @@ class Game {
       )
       this.snakes.push(snake)
     } else {
-      client.write("No space for you, try again soon!\n", () => client.end())
+      try {
+        client.write("No space for you, try again soon!\n", () => client.end())
+      } catch (e) {
+        // meh
+      }
     }
   }
 
@@ -163,7 +172,7 @@ class Game {
     // Generate a dot at a random x/y coordinate
     const x = randomNum(0, this.ui.gameContainer.width - 1)
     const y = randomNum(1, this.ui.gameContainer.height - 1)
-    
+
     if (!this.isSafe(x, y)) return this.generateDot()
 
     const dot = new Dot(x, y, this.randomItem(DOT_COLORS))

@@ -44,8 +44,8 @@ class Snake {
   setMessage(msg) {
     this.message = msg
     if (this.messageTimeout) clearTimeout(this.messageTimeout)
-    this.messageTimeout = setTimeout(() => { 
-      this.message = null 
+    this.messageTimeout = setTimeout(() => {
+      this.message = null
     }, MESSAGE_TIMEOUT)
   }
 
@@ -90,7 +90,7 @@ class Snake {
       this.currentDirection = 'right'
       valid = true
     }
-    
+
     if (valid) {
       if (!this.autoMove) this.move()
       return true
@@ -124,10 +124,14 @@ class Snake {
   }
 
   bye(message) {
-    if (message) {
-      this.client.write(`${message}\n`, () => this.client.end())
-    } else {
-      this.client.end()
+    try {
+      if (message) {
+        this.client.write(`${message}\n`, () => this.client.end())
+      } else {
+        this.client.end()
+      }
+    } catch (e) {
+      // fail silently if client write/end error
     }
   }
 
