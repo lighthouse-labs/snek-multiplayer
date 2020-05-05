@@ -20,11 +20,17 @@ class RemoteInterface {
   }
 
   launchServer() {
-    this.server = net.createServer()
+    this.server = net.createServer((socket) => {
+      // Important: This error handler  is different than the one below! - KV
+      socket.on('error', (err) => {
+        // ignore errors! - Without this callback, we can get a ECONNRESET error that crashes the server - KV
+      })
+    })
       .on('connection', this.handleNewClient.bind(this))
       .on('error', (err) => {
         // handle errors here
-        throw err
+        console.log('Error: ', err);
+        // throw err
       })
       .listen(PORT, () => {
         console.log('opened server on', this.server.address())
