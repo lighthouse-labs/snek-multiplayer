@@ -1,4 +1,4 @@
-const PORT = 50541
+const PORT = 8080
 
 const GAME_SPEED = 50
 const DIRECTIONS = {
