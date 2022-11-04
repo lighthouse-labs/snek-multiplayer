@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "blessed": "^0.1.81",
-    "ip": "^1.1.5"
+    "ip": "^1.1.5",
+    "xterm": "^4.18.0"
   },
   "licence": "MIT",
   "keywords": [

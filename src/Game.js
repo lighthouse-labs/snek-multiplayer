@@ -6,12 +6,13 @@ const {
   SNAKE_COLLISIONS,
   AUTO_MOVE_DEFAULT,
   MAX_PLAYER_NAME_LENGTH,
-  MAX_PLAYER_MSG_LENGTH
-} = require('./constants')
-
-const { randomNum } = require('./utils')
-const { Snake } = require('./Snake')
-const { Dot } = require('./Dot')
+  MAX_PLAYER_MSG_LENGTH,
+} = require("./constants");
+const http = require("http");
+const fs = require("fs");
+const { randomNum } = require("./utils");
+const { Snake } = require("./Snake");
+const { Dot } = require("./Dot");
 
 /**
  * @class Game
@@ -29,83 +30,90 @@ const { Dot } = require('./Dot')
 class Game {
   constructor(ui, server) {
     // User interface class for all i/o operations
-    this.ui = ui
-    this.server = server
+    this.ui = ui;
+    this.server = server;
+    this.sgr_content = [];
 
-    this.autoMove = AUTO_MOVE_DEFAULT
+    this.autoMove = AUTO_MOVE_DEFAULT;
 
-    this.reset()
+    this.reset();
 
     // Bind handlers to UI so we can detect input change from the Game class
     this.ui.bindHandlers(
       () => {}, //this.changeDirection.bind(this),
       this.quit.bind(this),
       this.start.bind(this)
-    )
+    );
 
     this.server.bindHandlers(
       this.handlePlayerInput.bind(this),
       this.newPlayer.bind(this),
       this.playerLeft.bind(this)
-    )
+    );
   }
 
   reset() {
     // Set up initial state
-    this.snakes = []
-    this.dots = []
-    this.score = 0
-    this.timer = null
+    this.snakes = [];
+    this.dots = [];
+    this.score = 0;
+    this.timer = null;
 
     // Generate the first dot before the game begins
     // this.generateDot()
-    this.ui.resetScore()
-    this.ui.render()
+    this.ui.resetScore();
+    this.ui.render();
   }
 
   handlePlayerInput(input, client) {
-    const snake = this.snakes.find(s => s.client === client)
-    if (!snake) return false
+    const snake = this.snakes.find((s) => s.client === client);
+    if (!snake) return false;
 
-    const dir = input.match(/Move: (.*)/)
-    const name = input.match(/Name: (.*)/)
-    const say  = input.match(/Say: (.*)/)
+    const dir = input.match(/Move: (.*)/);
+    const name = input.match(/Name: (.*)/);
+    const say = input.match(/Say: (.*)/);
 
     if (dir) {
-      return snake.changeDirection(dir[1])
+      return snake.changeDirection(dir[1]);
     } else if (name) {
-      return snake.changeName(name[1].trim().substring(0, MAX_PLAYER_NAME_LENGTH))
+      return snake.changeName(name[1].trim().substring(0, MAX_PLAYER_NAME_LENGTH));
     } else if (say) {
-      return snake.setMessage(say[1].trim().substring(0, MAX_PLAYER_MSG_LENGTH))
+      return snake.setMessage(say[1].trim().substring(0, MAX_PLAYER_MSG_LENGTH));
     }
 
     try {
-      client.write('Huh?\n');
+      client.write("Huh?\n");
     } catch (e) {
       // nothing to do really.
     }
 
-    return false
+    return false;
   }
 
   safeSnakeStartingCoords() {
     let attempts = 0;
 
-    while(attempts < 100) {
+    while (attempts < 100) {
       // console.log('trying: ', attempts);
-      const x = randomNum(0 + INITIAL_SNAKE_SIZE, this.ui.gameContainer.width - 1 - INITIAL_SNAKE_SIZE)
-      const y = randomNum(0 + INITIAL_SNAKE_SIZE, this.ui.gameContainer.height - 1 - INITIAL_SNAKE_SIZE)
+      const x = randomNum(
+        0 + INITIAL_SNAKE_SIZE,
+        this.ui.gameContainer.width - 1 - INITIAL_SNAKE_SIZE
+      );
+      const y = randomNum(
+        0 + INITIAL_SNAKE_SIZE,
+        this.ui.gameContainer.height - 1 - INITIAL_SNAKE_SIZE
+      );
 
-      if (this.isSafe(x, y)) return { x, y }
-      attempts += 1
+      if (this.isSafe(x, y)) return { x, y };
+      attempts += 1;
     }
 
     // we failed to find a safe starting pos
-    return false
+    return false;
   }
 
   newPlayer(client) {
-    const coords = this.safeSnakeStartingCoords()
+    const coords = this.safeSnakeStartingCoords();
     if (coords) {
       const snake = new Snake(
         client,
@@ -114,11 +122,11 @@ class Game {
         this.randomItem(SNAKE_COLORS),
         this.autoMove,
         this.snakeMoved.bind(this)
-      )
-      this.snakes.push(snake)
+      );
+      this.snakes.push(snake);
     } else {
       try {
-        client.write("No space for you, try again soon!\n", () => client.end())
+        client.write("No space for you, try again soon!\n", () => client.end());
       } catch (e) {
         // meh
       }
@@ -126,22 +134,22 @@ class Game {
   }
 
   randomItem(arr) {
-    return arr[Math.floor(Math.random() * arr.length)]
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
   playerLeft(client) {
-    const index = this.snakes.findIndex(s => s.client === client)
-    if (index >= 0) this.removeSnake(this.snakes[index], index)
+    const index = this.snakes.findIndex((s) => s.client === client);
+    if (index >= 0) this.removeSnake(this.snakes[index], index);
   }
 
   checkDotHits(position, snake) {
     for (const [i, dot] of this.dots.entries()) {
       if (position.x === dot.x && position.y === dot.y) {
-        snake.scored()
-        snake.growBy += 1
-        this.ui.updateScore(snake.score)
-        this.removeDot(dot, i)
-        return
+        snake.scored();
+        snake.growBy += 1;
+        this.ui.updateScore(snake.score);
+        this.removeDot(dot, i);
+        return;
       }
     }
   }
@@ -157,85 +165,85 @@ class Game {
   snakeMoved(position, snake) {
     // If the snake lands on a dot, increase the score and generate a new dot
     // check collisions with Dots
-    this.checkDotHits(position, snake)
+    this.checkDotHits(position, snake);
   }
 
   isSafe(x, y) {
     // If the pixel is on a snake, regenerate the dot
-    return(
-      !this.snakes.some(s => s.isAt({ x, y })) &&
-      !this.dots.some(d => d.isAt({x, y}))
-    )
+    return (
+      !this.snakes.some((s) => s.isAt({ x, y })) &&
+      !this.dots.some((d) => d.isAt({ x, y }))
+    );
   }
 
   generateDot() {
     // Generate a dot at a random x/y coordinate
-    const x = randomNum(0, this.ui.gameContainer.width - 1)
-    const y = randomNum(1, this.ui.gameContainer.height - 1)
+    const x = randomNum(0, this.ui.gameContainer.width - 1);
+    const y = randomNum(1, this.ui.gameContainer.height - 1);
 
-    if (!this.isSafe(x, y)) return this.generateDot()
+    if (!this.isSafe(x, y)) return this.generateDot();
 
-    const dot = new Dot(x, y, this.randomItem(DOT_COLORS))
-    this.dots.push(dot)
+    const dot = new Dot(x, y, this.randomItem(DOT_COLORS));
+    this.dots.push(dot);
   }
 
   generateDots() {
-    const maxDots = Math.ceil(this.snakes.length / 2)
-    const diff = maxDots - this.dots.length
-    for (let i = 0; i < diff; i++) this.generateDot()
+    const maxDots = Math.ceil(this.snakes.length / 2);
+    const diff = maxDots - this.dots.length;
+    for (let i = 0; i < diff; i++) this.generateDot();
   }
 
   drawSnakes() {
     // Render each snake segment as a pixel
     for (let snake of this.snakes) {
-      this.drawSnake(snake)
+      this.drawSnake(snake);
     }
   }
 
   drawSnake(snake) {
     snake.segments.forEach((segment, i) => {
-      this.ui.draw(segment, i === 0 ? 'gray' : snake.color)
-    })
+      this.ui.draw(segment, i === 0 ? "gray" : snake.color);
+    });
     if (snake.message) {
-      const msg = snake.name ? `${snake.name}: ${snake.message}` : snake.message
-      const segment = snake.segments[0]
-      this.ui.text({x: segment.x - 1, y: segment.y - 1}, msg, snake.color)
+      const msg = snake.name ? `${snake.name}: ${snake.message}` : snake.message;
+      const segment = snake.segments[0];
+      this.ui.text({ x: segment.x - 1, y: segment.y - 1 }, msg, snake.color);
     }
   }
 
   drawDots() {
     // Render the dot as a pixel
     for (const dot of this.dots) {
-      this.ui.draw(dot, dot.color)
+      this.ui.draw(dot, dot.color);
     }
   }
 
   removeSnake(snake, index, message) {
-    snake.bye(message)
+    snake.bye(message);
     if (index !== undefined && index >= 0) {
-      this.snakes.splice(index, 1)
+      this.snakes.splice(index, 1);
     }
   }
 
   removeDot(dot, index) {
     if (index !== undefined && index >= 0) {
-      this.dots.splice(index, 1)
+      this.dots.splice(index, 1);
     }
   }
 
   checkPlayerHits() {
-    const width = this.ui.gameContainer.width
-    const height = this.ui.gameContainer.height
+    const width = this.ui.gameContainer.width;
+    const height = this.ui.gameContainer.height;
 
     for (let [i, snake] of this.snakes.entries()) {
       if (snake.hit(width, height)) {
-        return this.removeSnake(snake, i, 'you crashed, so you ded.')
+        return this.removeSnake(snake, i, "you crashed, so you ded.");
       }
 
       if (SNAKE_COLLISIONS) {
         for (let [j, otherSnake] of this.snakes.entries()) {
           if (i !== j && snake.hitSnake(otherSnake)) {
-            return this.removeSnake(snake, i, 'you hit another snake, so you ded.')
+            return this.removeSnake(snake, i, "you hit another snake, so you ded.");
           }
         }
       }
@@ -243,30 +251,45 @@ class Game {
   }
 
   moveSnakes() {
-    this.snakes.forEach(s => s.move.bind(s)())
+    this.snakes.forEach((s) => s.move.bind(s)());
   }
 
   tick() {
-    this.checkPlayerHits()
-    this.ui.clearScreen()
-    this.generateDots()
-    this.drawDots()
-    if (this.autoMove) this.moveSnakes()
-    this.drawSnakes()
-    this.ui.render()
+    this.checkPlayerHits();
+    this.ui.clearScreen();
+    this.generateDots();
+    this.drawDots();
+    if (this.autoMove) this.moveSnakes();
+    this.drawSnakes();
+    this.sgr_content = this.ui.render();
   }
 
   start() {
     if (!this.timer) {
-      this.reset()
+      this.reset();
 
-      this.timer = setInterval(this.tick.bind(this), GAME_SPEED)
+      this.timer = setInterval(this.tick.bind(this), GAME_SPEED);
     }
   }
 
   quit() {
-    process.exit(0)
+    process.exit(0);
+  }
+
+  startWebServer() {
+    const htmlContent = fs.readFileSync("./bob.html", "utf-8");
+    const server = http.createServer((req, res) => {
+      // console.log(req.path, req.url);
+      if (req.url === "/view") {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        return res.end(htmlContent);
+      }
+      res.writeHead(200, { "Content-Type": "application/json" });
+      return res.end(JSON.stringify(this.sgr_content));
+    });
+
+    server.listen(8000);
   }
 }
 
-module.exports = { Game }
+module.exports = { Game };

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"></script>
+  </head>
+  <body>
+    <div id="terminal"></div>
+
+    <script>
+      const fetchNewestArray = () => {
+        fetch("/")
+          .then((res) => res.json())
+          .then((data) => {
+            for (let i = 0; i < data.height; i++) {
+              term.write("\x1b[A\r");
+            }
+            for (const row of data.content) {
+              term.write(row);
+            }
+          });
+      };
+      const fetchDimensions = () => {
+        fetch("/")
+          .then((res) => res.json())
+          .then((data) => {
+            term = new Terminal();
+            term.resize(data.width, data.height);
+            term.open(document.getElementById("terminal"));
+          });
+      };
+
+      setInterval(fetchNewestArray, 100);
+      const dumbArray = [
+        "\u001b[1;44;37mIP:\u001b[m\u001b[44;37m 172.26.240.20 \u001b[m\u001b[1;44;37mPORT:\u001b[m\u001b[44;37m 50541                                                                                                                \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "\u001b[47;37m                                                                                                                                             \u001b[m",
+        "",
+      ];
+
+      var term = null;
+      fetchDimensions();
+      // term.write(
+      //   "[47;37m                                                                                                                                                                           [m"
+      // );
+    </script>
+  </body>
+</html>
