@@ -18,6 +18,10 @@ const point = 0;
 const initialLoadInfo = {
   ip: "",
   port: "",
+  grid:{
+    width:100
+    height:100
+  }
   // snekColor: "", => terminal client
 };
 
